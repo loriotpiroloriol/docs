@@ -78,6 +78,14 @@ EXEC sys.sp_cdc_enable_db
 GO
 ```
 
+> Note:
+>
+> For SQL Server on AWS RDS, you must use a different stored procedure:
+> ```sql
+> EXEC msdb.dbo.rds_cdc_enable_db 'Chinook'
+> GO
+> ```
+
 When you enable CDC for the database, it creates a schema called `cdc` and also
 a CDC user, metadata tables, and other system objects. 
 
@@ -102,8 +110,8 @@ following commands (again, you need administrator privileges for this):
 
     > Note:
     > 
-    > You cannot use an existing server or database role for `@role_name`. The role
-    > you specify here is created automatically the first time you run the stored procedure.
+    > The value for @role_name can’t be a fixed database role, such as `db_datareader`. Specifying
+    > a new name will create a corresponding database role that has full access to the captured change data.
   
 1.  Add the Debezium user to the CDC role:
 
