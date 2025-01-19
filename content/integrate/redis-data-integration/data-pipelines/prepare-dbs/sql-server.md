@@ -63,8 +63,6 @@ permissions are granted and that the user is added to the CDC role.
 There are two system stored procedures to enable CDC (you need
 administrator privileges to run these). Use `sys.sp_cdc_enable_db`
 to enable CDC for the whole database and then `sys.sp_cdc_enable_table` to enable CDC for individual tables. 
-You can run the procedures with SQL Server Management Studio or with
-Transact-SQL. This guide shows the steps for Transact-SQL.
 
 Before running the procedure, ensure that:
 
