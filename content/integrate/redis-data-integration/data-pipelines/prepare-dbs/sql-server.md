@@ -63,7 +63,7 @@ There are two system stored procedures to enable CDC (you need
 administrator privileges to run these). Use `sys.sp_cdc_enable_db`
 to enable CDC for the whole database and then `sys.sp_cdc_enable_table` to enable CDC for individual tables. 
 
-Before running the procedure, ensure that:
+Before running the procedures, ensure that:
 
 - You are a member of the `sysadmin` fixed server role for the SQL Server.
 - You are a `db_owner` of the database.
@@ -207,8 +207,8 @@ documentation for further details.
     @source_schema    = N'dbo',
     @source_name      = N'MyTable',
     @role_name        = N'MyRole',
-    @capture_instance = N'dbo_MyTable_v2';
-    @supports_net_changes = 0,
+    @capture_instance = N'dbo_MyTable_v2',
+    @supports_net_changes = 0
     GO
     ```
 
@@ -220,7 +220,7 @@ documentation for further details.
     EXEC sys.sp_cdc_disable_table
     @source_schema    = N'dbo',
     @source_name      = N'MyTable',
-    @capture_instance = N'dbo_MyTable';
+    @capture_instance = N'dbo_MyTable'
     GO
     ```
 
