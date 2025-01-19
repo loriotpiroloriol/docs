@@ -17,12 +17,11 @@ weight: 2
 ---
 
 To prepare your SQL Server database for Debezium, you must first create a dedicated Debezium user,
-run a query to enable CDC globally and then separately enable CDC for each table you want to
+run a script to enable CDC globally and then separately enable CDC for each table you want to
 capture. You need administrator privileges to do this.
 
 Once you enable CDC, it captures all of the INSERT, UPDATE, and DELETE operations
-on your chosen tables. The Debezium connector can then emit these events to
-Redis streams.
+on your chosen tables. The Debezium connector can then emit these events to RDI.
 
 ## 1. Create a Debezium user
 
@@ -102,6 +101,7 @@ following commands (again, you need administrator privileges for this):
     Repeate this for every table you want to capture.
 
     > Note:
+    > 
     > You cannot use an existing server or database role for `@role_name`. The role
     > you specify here is created automatically the first time you run the stored procedure.
   
