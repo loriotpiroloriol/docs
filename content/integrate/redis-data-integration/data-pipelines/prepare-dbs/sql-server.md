@@ -136,14 +136,7 @@ it correctly. To do this, connect as the Debezium user you created previously (`
     access. If the result is empty then you should check that you have privileges
     to access both the capture instance and the CDC tables.
 
-## SQL Server on Azure
-
-You can also use the Debezium SQL Server connector with SQL Server on Azure.
-See Microsoft's guide to
-[configuring SQL Server on Azure for CDC with Debezium](https://learn.microsoft.com/en-us/samples/azure-samples/azure-sql-db-change-stream-debezium/azure-sql%2D%2Dsql-server-change-stream-with-debezium/)
-for more information.
-
-### SQL Server capture job agent configuration parameters
+## SQL Server capture job agent configuration parameters
 
 In SQL Server, the parameters that control the behavior of the capture job agent
 are defined in the SQL Server table `msdb.dbo.cdc_jobs`. If you experience performance
@@ -173,6 +166,13 @@ of the Debezium SQL Server connector:
   reduces the load on the database host, but increases latency. The default value is 10.
 
 See the SQL Server documentation for more information about capture agent parameters.
+
+## SQL Server on Azure
+
+You can also use the Debezium SQL Server connector with SQL Server on Azure.
+See Microsoft's guide to
+[configuring SQL Server on Azure for CDC with Debezium](https://learn.microsoft.com/en-us/samples/azure-samples/azure-sql-db-change-stream-debezium/azure-sql%2D%2Dsql-server-change-stream-with-debezium/)
+for more information.
 
 ## Handling changes to the schema
 
