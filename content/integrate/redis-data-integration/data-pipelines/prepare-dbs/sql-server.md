@@ -22,11 +22,15 @@ capture. You need administrator privileges to do this.
 
 Once you enable CDC, it captures all of the INSERT, UPDATE, and DELETE operations
 on your chosen tables. The Debezium connector can then emit these events to
-[Kafka topics](https://kafka.apache.org/intro#intro_concepts_and_terms).
+Redis streams.
 
 ## 1. Create a Debezium user
 
-1.  Create a user with the Transact-SQL below.
+It is strongly recommended to create a dedicated Debezium user for the connection between RDI
+and the source database. When using an existing user, ensure that the required 
+permissions are granted and that the user is added to the CDC role.
+
+1.  Create a user with the Transact-SQL below:
 
     ```sql
     USE master
@@ -41,7 +45,7 @@ on your chosen tables. The Debezium connector can then emit these events to
 
     Replace `MyUser`, `My_Password` and `MyDB` with your chosen values.
 
-1.  Grant required permissions.
+1.  Grant required permissions:
 
     ```sql
     USE master
@@ -58,9 +62,9 @@ on your chosen tables. The Debezium connector can then emit these events to
 
 There are two system stored procedures to enable CDC (you need
 administrator privileges to run these). Use `sys.sp_cdc_enable_db`
-to enable CDC for the whole database and then 
-You can run the procedure with SQL Server Management Studio or with
-Transact-SQL.
+to enable CDC for the whole database and then `sys.sp_cdc_enable_table` to enable CDC for individual tables. 
+You can run the procedures with SQL Server Management Studio or with
+Transact-SQL. This guide shows the steps for Transact-SQL.
 
 Before running the procedure, ensure that:
 
@@ -68,44 +72,22 @@ Before running the procedure, ensure that:
 - You are a `db_owner` of the database.
 - The SQL Server Agent is running.
 
-Then, follow the steps below to enable CDC:
+Then, assuming your database is called `MyDB`, run the script below to enable CDC:
 
-1.  From the **View** menu in SQL Server Management Studio, click **Template Explorer**.
-
-1.  In the Template Browser, expand **SQL Server Templates**.
-
-1.  Expand **Change Data Capture > Configuration** and then double-click **Enable Database for CDC**.
-
-1.  In the template, replace the database name in the `USE` statement with the name of the
-    database where you want to enable CDC. For example, if your database was called
-    `MyDB`, the template would be:
-
-    ```sql
-    USE MyDB
-    GO
-    EXEC sys.sp_cdc_enable_db
-    GO
-    ```
-
-1.  Run the stored procedure `sys.sp_cdc_enable_db` to enable CDC for the database.
+```sql
+USE MyDB
+GO
+EXEC sys.sp_cdc_enable_db
+GO
+```
 
 When you enable CDC for the database, it creates a schema called `cdc` and also
 a CDC user, metadata tables, and other system objects. 
 
-Keep the **Change Data Capture > Configuration** foldout open in the Template Explorer
-because you will need it to enable CDC on the individual tables next.
-
 ## 3. Enable CDC for the tables you want to capture
 
-You must also enable CDC on the tables you want Debezium to capture using the
-following steps (again, you need administrator privileges for this):
-
-1.  With the **Change Data Capture > Configuration** foldout still open in the
-    Template Explorer, select **Enable Table Specifying Filegroup Option**.
-
-1.  In the template, replace the table name in the USE statement with the name of
-    the table you want to capture. For example, if your table was called `MyTable`
-    then the template would look like the following:
+1.  You must also enable CDC on the tables you want Debezium to capture using the
+following commands (again, you need administrator privileges for this):
 
     ```sql
     USE MyDB
@@ -119,19 +101,16 @@ following steps (again, you need administrator privileges for this):
     GO
     ```
 
+    Repeate this for every table you want to capture.
+
     > Note:
     > You cannot use an existing server or database role for `@role_name`. The role
     > you specify here is created automatically the first time you run the stored procedure.
   
-1.  Run the stored procedure `sys.sp_cdc_enable_table` to enable CDC for
-    the table.
-
-1.  Repeat steps 1 to 3 for every table you want to capture.
-
-1.  Add the Debezium user to the CDC role.
+1.  Add the Debezium user to the CDC role:
 
     ```sql
-    USE Chinook
+    USE MyDB
     GO
     EXEC sp_addrolemember N'MyRole', N'MyUser'
     GO
@@ -214,19 +193,28 @@ documentation for further details.
 
 1.  Create a new capture table for the updated source table by running the `sys.sp_cdc_enable_table` stored
     procedure with a new, unique value for the parameter `@capture_instance`. For example, if the old value
-    was `dbo_customers`, you could replace it with `dbo_customers_v2`:
+    was `dbo_MyTable`, you could replace it with `dbo_MyTable_v2` (you can see the existing values by running
+    stored procedure `sys.sp_cdc_help_change_data_capture`):
 
     ```sql
-    EXEC sys.sp_cdc_enable_table @source_schema = 'dbo', @source_name = 'customers', @role_name = NULL, @supports_net_changes = 0, @capture_instance = 'dbo_customers_v2';
+    EXEC sys.sp_cdc_enable_table
+    @source_schema    = N'dbo',
+    @source_name      = N'MyTable',
+    @role_name        = N'MyRole',
+    @capture_instance = N'dbo_MyTable_v2';
+    @supports_net_changes = 0,
     GO
     ```
 
 1.  When Debezium starts streaming from the new capture table, drop the old capture table by running 
     the `sys.sp_cdc_disable_table` stored procedure with the parameter `@capture_instance` set to the old
-    capture instance name, `dbo_customers`:
+    capture instance name, `dbo_MyTable`:
 
     ```sql
-    EXEC sys.sp_cdc_disable_table @source_schema = 'dbo', @source_name = 'dbo_customers', @capture_instance = 'dbo_customers';
+    EXEC sys.sp_cdc_disable_table
+    @source_schema    = N'dbo',
+    @source_name      = N'MyTable',
+    @capture_instance = N'dbo_MyTable';
     GO
     ```
 
